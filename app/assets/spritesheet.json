@@ -1,0 +1,21 @@
+{"frames": [
+
+{
+	"filename": "pit.png",
+	"frame": {"x":0,"y":0,"w":16,"h":16},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+	"sourceSize": {"w":16,"h":16},
+	"pivot": {"x":0.5,"y":0.5}
+}],
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "spritesheet.png",
+	"format": "RGBA8888",
+	"size": {"w":224,"h":926},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:4cb5dc016b0558657bb97de3fe3112e2:d4cb1413a9a9930eec0551c02545f6cc:729adc6043343cfda41c447ce8f464d6$"
+}
+}

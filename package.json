@@ -1,0 +1,24 @@
+{
+  "name": "tgl-console",
+  "description": "web gl terminal",
+  "private": true,
+  "author": "Sean Morris",
+  "version": "0.0.0",
+  "repository": "",
+  "scripts": {
+    "start": "brunch watch --server",
+    "build": "brunch build --production"
+  },
+  "dependencies": {
+    "curvature": "^0.0.49"
+  },
+  "devDependencies": {
+    "auto-reload-brunch": "^2",
+    "babel-brunch": "^6.1.1",
+    "babel-preset-latest": "^6",
+    "brunch": "^2.10.17",
+    "clean-css-brunch": "^2",
+    "raw-brunch": "^1.0.2",
+    "uglify-js-brunch": "^2"
+  }
+}
