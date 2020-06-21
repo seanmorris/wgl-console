@@ -6,7 +6,8 @@ import { SpriteBoard } from '../sprite/SpriteBoard';
 import { Keyboard         } from 'curvature/input/Keyboard'
 import { View as BaseView } from 'curvature/base/View';
 
-import { ViewBuffer } from '../ViewBuffer';
+// import { Shell } from '../console/Shell';
+import { LineBuffer } from '../console/LineBuffer';
 
 export class View extends BaseView
 {
@@ -27,7 +28,9 @@ export class View extends BaseView
 
 		this.scrollLock = false;
 
+		this.style = '';
 		this.color = 'white';
+		this.bg    = 'black';
 	}
 
 	postRender()
@@ -39,28 +42,60 @@ export class View extends BaseView
 			, this.cellSizeY
 		);
 
-		const vb = new ViewBuffer(this);
+		const vb  = new LineBuffer();
+		const vb2 = new LineBuffer();
+		const vb3 = new LineBuffer();
+		
+		this.inputBuffer = new LineBuffer();
 
-		vb.content = 'something';
+		// vb.content  = 'something';
+		// vb2.content = 'something else';
+		// vb3.content = '\u001b[0msomething else\u001b[0m';
 
-		this.onInterval(1000, () => {
+		// this.onInterval(1500, () => {
+		// 	vb.content = '\u001b[1mNYC:'
+		// 		+ ' \u001b[36;0;3;m'
+		// 		+ (new Date).toLocaleString('en-US', {
+		// 			timeZone: 'America/New_York'
+		// 		})
+		// 		+ ' \u001b[38;2;255;255;255;48;2;255;0;0;1m '
+		// 		+ 10 ** Math.floor( Math.random() * 5 )
+		// 		+ ' lmao'
+		// 		+ ' \u001b[0m';
+		// });
+		
+		// this.onInterval(1000, () => {
+		// 	vb2.content = 'UTC:'
+		// 		+ ' \u001b[31m'
+		// 		+ (new Date).toLocaleString('en-US', {
+		// 			timeZone: 'UTC'
+		// 		})
+		// 		+ ' \u001b[47;30m '
+		// 		+ 10 ** Math.floor( Math.random() * 10 )
+		// 		+ ' lmao'
+		// 		+ ' \u001b[0m';
+		// });
 
-			vb.content = (new Date).toString();
+		// let iii = 0
 
-		});
+		// // this.onInterval(10, () => {
+		// // 	vb3.content = '\u001b[35m' + String(iii++);
+		// // });
 
-		this.color = 'lightgreen';
+		this.color = 'white';
 
-		vb.render().then(() => this.print(
-			`Two roads diverged in a yellow wood...`
-		)).then(() => {
+		this.print(
+			require('../static/declaration')
+			).then(() => this.color = 'white'
+			).then(() => this.inputBuffer.render(this)
+			).then(() => {
 
-			this.cursor = new Sprite('X');
+			this.cursor = new Sprite('_');
+
+			this.color = 'white';
 
 			this.cursor.x = this.cellSizeX * this.cursorX;
 			this.cursor.y = this.cellSizeY * this.cursorY;
-
-			this.color = 'white';
 
 			spriteBoard.sprites.add(this.cursor);
 
@@ -116,40 +151,84 @@ export class View extends BaseView
 
 					if(k === 'Enter')
 					{
-						return this.newline().then(()=>{
-							bg.updateTile(pX, pY);
-							bg.updateTile(0, this.cursorY);
-						});
+						const input = this.inputBuffer.content;
 
-						return;
+						return this.newline().then(()=>{
+
+							const returnBuffer = this.interpret(input);
+
+							if(typeof returnBuffer === 'string' || !returnBuffer)
+							{
+								const output = new LineBuffer(this);
+
+								if(returnBuffer === undefined)
+								{
+									output.content = `Command not found: "${input}"`;
+								}
+								else
+								{
+									output.content = returnBuffer;
+								}
+
+
+								output.render(this);
+							}
+							else
+							{
+								returnBuffer.render(this);
+							}
+						
+							this.inputBuffer = new LineBuffer(this);
+
+							return this.newline();
+						
+						}).then(()=>{
+
+							this.inputBuffer.render(this)
+
+						});
 					}
 
 					if(k === 'Backspace')
 					{
-						this.drawChar(' ').then(() => {
-							this.receedCursor();
-							
-							bg.updateTile(pX, pY);
+						this.inputBuffer.content = this.inputBuffer.content.substring(
+							0, this.inputBuffer.content.length -1
+						);
 
-							this.cursor.x = this.cellSizeX * this.cursorX;
-							this.cursor.y = this.cellSizeY * this.cursorY;
-						});
+						this.receedCursor();
+						
+						bg.updateTile(pX, pY);
+
+						this.cursor.x = this.cellSizeX * this.cursorX;
+						this.cursor.y = this.cellSizeY * this.cursorY;
+
+						if(!this.scrollLock)
+						{
+							this.zeroCamera();
+						}
 
 						return;
 					}
 
 					if(k.length !== 1)
 					{
-						return;
+						return Promise.resolve();
 					}
 
-					this.printChar(k).then(()=>{
+					this.inputBuffer.content += k;
 
-						const halfCell = this.cellSizeY / 2;
-						
-						this.cursor.x = this.cellSizeX * this.cursorX;
-						this.cursor.y = this.cellSizeY * this.cursorY;
-					});
+					this.advanceCursor();
+
+					const xOffset = (this.spriteBoard.Camera.width / 2) % 1;
+					const yOffset = (this.spriteBoard.Camera.height / 2) % 1;
+
+					this.cursor.x = this.cellSizeX * this.cursorX + xOffset;
+					this.cursor.y = this.cellSizeY * this.cursorY + yOffset;
+
+					if(!this.scrollLock)
+					{
+						this.zeroCamera();
+					}
 				}
 			});
 		} );
@@ -163,7 +242,7 @@ export class View extends BaseView
 		const update = (now) =>{
 			now = now / 1000;
 
-			this.keyboard.update();
+			// this.keyboard.update();
 
 			const delta = now - fThen;
 
@@ -259,9 +338,16 @@ export class View extends BaseView
 
 	zeroCameraY()
 	{
-		this.spriteBoard.Camera.y = Math.floor(
+		const zeroY = Math.floor(
 			(document.body.clientHeight - (this.cellSizeY /2)) / 2
 		);
+
+		if(this.cursorY > this.lineHeight())
+		{
+			return this.scrollNewline();
+		}
+		
+		this.spriteBoard.Camera.y = zeroY;
 	}
 
 	zeroCamera()
@@ -355,10 +441,19 @@ export class View extends BaseView
 		x = x === undefined ? this.cursorX : x;
 		y = y === undefined ? this.cursorY : y;
 
+		if(char === "\u001b")
+		{
+			return Promise.resolve();
+		}
+
+		if(char === "\n")
+		{
+			return this.newline();
+		}
 
 		return this.map.SpriteSheet.createCharacter(
 
-			char, this.cellSizeX, this.cellSizeY, this.color
+			char, this.cellSizeX, this.cellSizeY, this.color, this.bg, this.style
 
 		).then(key => {
 		
@@ -383,7 +478,7 @@ export class View extends BaseView
 		}
 
 		return this.map.SpriteSheet.createCharacter(
-			char, this.cellSizeX, this.cellSizeY, this.color
+			char, this.cellSizeX, this.cellSizeY, this.color, this.bg, this.style
 		).then(
 			(key) => {
 
@@ -406,8 +501,10 @@ export class View extends BaseView
 
 		const spriteSheet = this.map.SpriteSheet;
 
+		console.log(this.color, this.bg);
+
 		const blitters = chars.map( char => spriteSheet.createCharacter(
-			char, this.cellSizeX, this.cellSizeY
+			char, this.cellSizeX, this.cellSizeY, this.color, this.bg, this.style
 		));
 		
 		const printer = (chars) => {
@@ -441,6 +538,67 @@ export class View extends BaseView
 		else if(event.deltaY < 0)
 		{
 			this.spriteBoard.Camera.y -= this.cellSizeY;
+		}
+	}
+
+	interpret(command)
+	{
+		const pallette = {
+
+			clock: (timeout = 10, timeZone = 'America/New_York') => {
+
+				const buff = new LineBuffer();
+
+				const drop = this.onInterval(10, ()=> {
+					buff.content = (new Date).toLocaleString('en-US', {
+						timeZone
+					});
+				});
+
+				if(timeout)
+				{
+					this.onTimeout(1000 * timeout, () => clearInterval(drop));
+				}
+
+				return buff;
+
+			}
+
+			, echo: (...args) => args.join(' ')
+
+
+			, range: (start, end) => {
+
+				start = parseInt(start);
+				end   = parseInt(end);
+
+				if(end <= start)
+				{
+					return;
+				}
+
+				const result = [];
+
+				for(let i = start; i < end; i++)
+				{
+					result.push(i);
+				}
+
+				return result.join(', ');
+			}
+
+		};
+
+		const split   = command.split(/\s/);
+		const program = split.shift();
+		const args    = split.slice(0);
+		const method  = pallette[ program ] || false;
+
+		console.log(program, split);
+
+		if(method)
+		{
+			return method(...args);
 		}
 	}
 }

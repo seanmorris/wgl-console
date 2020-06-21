@@ -7,7 +7,7 @@ exports.files = {
 exports.plugins = {
   babel: {presets: ['latest']},
   raw: {
-    pattern: /\.(html|vert|frag)$/,
+    pattern: /\.(html|vert|frag|svg|txt)$/,
     wrapper: content => `module.exports = ${JSON.stringify(content)}`
   }
 };

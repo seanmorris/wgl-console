@@ -156,13 +156,13 @@ export class SpriteSheet
 		return frames;
 	}
 
-	createCharacter(char, width = 24, height = 32, fg = 'white', bg = 'black')
+	createCharacter(char, width = 24, height = 32, fg = 'white', bg = 'black', style = '')
 	{
 		let key = char;
 
-		if(fg !== 'white' || bg !== 'black')
+		if(fg !== 'white' || bg !== 'black' || style !== '')
 		{
-			key += `::${fg}::${bg}`;
+			key += `::${fg}::${bg}::${style}`;
 		}
 
 		if(this.frames[key])
@@ -186,7 +186,7 @@ export class SpriteSheet
 		subContext.textBaseline = 'top';
 		subContext.textAlign    = 'center';
 		
-		subContext.font = `${height}px Helvetica`;
+		subContext.font = `${style} ${height}px Helvetica`;
 
 		subContext.fillText(char, width / 2, 0, width);
 
