@@ -39,35 +39,23 @@ export class View extends BaseView
 			, this.cellSizeY
 		);
 
+		const vb = new ViewBuffer(this);
+
+		vb.content = 'something';
+
+		this.onInterval(1000, () => {
+
+			vb.content = (new Date).toString();
+
+		});
+
 		this.color = 'lightgreen';
 
-		this.print(
-			`Two roads diverged in a yellow wood,
-And sorry I could not travel both
-And be one traveler, long I stood
-And looked down one as far as I could
-To where it bent in the undergrowth;
+		vb.render().then(() => this.print(
+			`Two roads diverged in a yellow wood...`
+		)).then(() => {
 
-Then took the other, as just as fair,
-And having perhaps the better claim,
-Because it was grassy and wanted wear;
-Though as for that the passing there
-Had worn them really about the same,
-
-And both that morning equally lay
-In leaves no step had trodden black.
-Oh, I kept the first for another day!
-Yet knowing how way leads on to way,
-I doubted if I should ever come back.
-
-I shall be telling this with a sigh
-Somewhere ages and ages hence:
-Two roads diverged in a wood, and I—
-I took the one less traveled by,
-And that has made all the difference.`
-		).then(() => {
-
-			this.cursor = new Sprite('_');
+			this.cursor = new Sprite('X');
 
 			this.cursor.x = this.cellSizeX * this.cursorX;
 			this.cursor.y = this.cellSizeY * this.cursorY;
@@ -156,8 +144,6 @@ And that has made all the difference.`
 					}
 
 					this.printChar(k).then(()=>{
-
-						bg.updateTile(pX, pY);
 
 						const halfCell = this.cellSizeY / 2;
 						
@@ -313,14 +299,14 @@ And that has made all the difference.`
 
 	newline()
 	{
-		return this.drawChar(' ').then(() => {
+		return new Promise((accept) => {
 
 			this.cursorX = 0;
 			this.cursorY++;
 			
 			this.scrollNewline();
 
-			return this.drawChar('_');
+			return accept();
 
 		}).then(() => {
 
@@ -362,21 +348,34 @@ And that has made all the difference.`
 		}
 	}
 
-	drawChar(char)
+	drawChar(char, x, y)
 	{
+		const bg = this.spriteBoard.background;
+
+		x = x === undefined ? this.cursorX : x;
+		y = y === undefined ? this.cursorY : y;
+
+
 		return this.map.SpriteSheet.createCharacter(
 
-			char, this.cellSizeX, this.cellSizeY
+			char, this.cellSizeX, this.cellSizeY, this.color
 
-		).then(
+		).then(key => {
+		
+			this.map.setTile(x, y, key)
+		
+		}).then(() => {
+		
+			bg.updateTile(x, y)
 
-			key => this.map.setTile(this.cursorX, this.cursorY, key)
+		});
 
-		);
 	}
 
 	printChar(char)
 	{
+		const bg = this.spriteBoard.background;
+
 		if(char === "\n")
 		{
 			return this.newline();
@@ -392,9 +391,11 @@ And that has made all the difference.`
 
 			}).then(() => {
 
-				this.advanceCursor();
+				bg.updateTile(this.cursorX, this.cursorY);
 
-				return this.drawChar('_');
+			}).then(() => {
+
+				return this.advanceCursor();
 			}
 		);
 	}

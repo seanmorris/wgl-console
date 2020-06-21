@@ -33,6 +33,8 @@ export class Map extends Injectable.inject({SpriteSheet})
 	setTile(x, y, image, layer = 0)
 	{
 		this.tiles[`${x},${y}--${layer}`] = image;
+
+		return Promise.resolve();
 	}
 
 	export()
