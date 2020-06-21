@@ -19,6 +19,8 @@ export class Map extends Injectable.inject({SpriteSheet})
 			return [tile];
 		}
 
+		// return false;
+
 		return [
 			this.SpriteSheet.getFrame('pit.png')
 		];

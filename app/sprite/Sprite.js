@@ -117,29 +117,29 @@ export class Sprite extends Injectable.inject({Gl2d, Camera, SpriteSheet})
 		);
 
 		this.SpriteSheet.ready.then((sheet)=>{
-			const frame = this.SpriteSheet.getFrame(imageSrc);
+			
+			this.SpriteSheet.createCharacter(imageSrc, 14, 21, 'red').then(key => {
 
-			if(frame)
-			{
-				Sprite.loadTexture(this.Gl2d, this.SpriteSheet, frame).then((args)=>{
-					this.texture = args.texture;
-					this.width   = args.image.width * this.scale;
-					this.height  = args.image.height * this.scale;
-				});
-			}
+				const frame = this.SpriteSheet.frames[key];
+				
+				console.log(frame);
+
+				if(frame)
+				{
+					Sprite.loadTexture(this.Gl2d, this.SpriteSheet, frame).then((args)=>{
+						this.texture = args.texture;
+						this.width   = args.image.width * this.scale;
+						this.height  = args.image.height * this.scale;
+					});
+				}
+
+			});
+
 		});
-
-
-
 	}
 
 	draw()
 	{
-		// if(this.moving == false && this.spriteSheet)
-		// {
-		// 	this.setFrames(this.standing.south);
-		// }
-
 		this.frameDelay = (this.maxSpeed * 1.5) - Math.abs(this.speed);
 
 		if(this.frameDelay > this.maxSpeed)
@@ -204,14 +204,14 @@ export class Sprite extends Injectable.inject({Gl2d, Camera, SpriteSheet})
 		]), gl.STREAM_DRAW);
 
 		this.setRectangle(
-			this.x   - (
+			this.x - (
 				this.Camera.x
 				- this.Camera.width / 2
-			) - ((this.height /2) * this.scale)
+			) //- ((this.height /2) * this.scale)
 			, this.y - (
 				this.Camera.y
 				- this.Camera.height /2
-			) - (this.height /2) - ((this.height /2) * this.scale)
+			) //- (this.height /2) - ((this.height /2) * this.scale)
 
 			, this.width
 			, this.height

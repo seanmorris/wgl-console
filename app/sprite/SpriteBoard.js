@@ -1,7 +1,6 @@
 import { Bag         } from 'curvature/base/Bag';
 import { Bindable    } from 'curvature/base/Bindable';
 
-import { Sprite      } from './Sprite';
 import { SpriteSheet } from './SpriteSheet';
 import { Background  } from './Background';
 
@@ -96,120 +95,6 @@ export class SpriteBoard extends Gl2d.inject({Camera})
 			, startGlobalY: null
 		};
 
-		this.selected = Bindable.makeBindable(this.selected);
-
-		let selecting = false;
-		let tileSize  = 32;
-
-		// this.element.addEventListener(
-		// 	'mousedown', (event)=>{
-		// 		let modSize   = tileSize * this.zoomLevel;
-
-		// 		if(this.unselect())
-		// 		{
-		// 			selecting = false;
-		// 			return;
-		// 		}
-
-		// 		// console.log(
-		// 		// 	event.clientX
-		// 		// 	, event.clientY
-		// 		// );
-
-		// 		selecting = true;
-		// 		this.mouse.clickX = event.clientX;
-		// 		this.mouse.clickY = event.clientY;
-
-		// 		let localX = Math.floor((this.mouse.clickX
-		// 			+ (this.Camera.x % modSize)
-		// 			- (Math.floor(this.element.width /2) % modSize)
-		// 			+ 16  * this.zoomLevel
-		// 		) / modSize);
-
-		// 		let localY = Math.floor((this.mouse.clickY
-		// 			+ (this.Camera.y % modSize)
-		// 			- (Math.floor(this.element.height /2) % modSize)
-		// 			+ 16  * this.zoomLevel
-		// 		) / modSize);
-
-		// 		this.selected.startLocalX = localX;
-		// 		this.selected.startLocalY = localY;
-
-		// 		this.selected.startGlobalX = (this.selected.startLocalX
-		// 			- Math.floor(Math.floor(this.element.width /2) / modSize)
-		// 			+ (this.Camera.x < 0
-		// 				? Math.ceil(this.Camera.x * this.zoomLevel / modSize)
-		// 				: Math.floor(this.Camera.x * this.zoomLevel / modSize)
-		// 			)
-		// 		);
-
-		// 		this.selected.startGlobalY = (this.selected.startLocalY
-		// 			- Math.floor(Math.floor(this.element.height /2) / modSize)
-		// 			+ (this.Camera.y < 0
-		// 				? Math.ceil(this.Camera.y * this.zoomLevel / modSize)
-		// 				: Math.floor(this.Camera.y * this.zoomLevel / modSize)
-		// 			)
-		// 		);
-		// 	}
-		// );
-
-		// this.element.addEventListener(
-		// 	'mouseup', (event)=>{
-		// 		let modSize   = tileSize * this.zoomLevel;
-
-		// 		if(!selecting)
-		// 		{
-		// 			selecting = false;
-		// 			return;
-		// 		}
-
-		// 		console.log(
-		// 			event.clientX
-		// 			, event.clientY
-		// 		);
-
-		// 		this.mouse.clickX = event.clientX;
-		// 		this.mouse.clickY = event.clientY;
-
-		// 		let localX = Math.floor((this.mouse.clickX
-		// 			+ (this.Camera.x % modSize)
-		// 			- (Math.floor(this.element.width /2) % modSize)
-		// 			+ 16  * this.zoomLevel
-		// 		) / modSize);
-
-		// 		let localY = Math.floor((this.mouse.clickY
-		// 			+ (this.Camera.y % modSize)
-		// 			- (Math.floor(this.element.height /2) % modSize)
-		// 			+ 16  * this.zoomLevel
-		// 		) / modSize);
-
-		// 		console.log(localX, localY);
-
-		// 		let globalX = (localX
-		// 			- Math.floor(Math.floor(this.element.width /2) / modSize)
-		// 			+ (this.Camera.x < 0
-		// 				? Math.ceil(this.Camera.x * this.zoomLevel / modSize)
-		// 				: Math.floor(this.Camera.x * this.zoomLevel / modSize)
-		// 			)
-		// 		);
-
-		// 		let globalY = (localY
-		// 			- Math.floor(Math.floor(this.element.height /2) / modSize)
-		// 			+ (this.Camera.y < 0
-		// 				? Math.ceil(this.Camera.y * this.zoomLevel / modSize)
-		// 				: Math.floor(this.Camera.y * this.zoomLevel /  modSize)
-		// 			)
-		// 		);
-
-		// 		this.selected.localX  = localX;
-		// 		this.selected.globalX = globalX;
-		// 		this.selected.localY  = localY;
-		// 		this.selected.globalY = globalY;
-
-		// 		selecting = false;
-		// 	}
-		// );
-
 		this.background = new Background(
 			this
 			, map
@@ -217,19 +102,8 @@ export class SpriteBoard extends Gl2d.inject({Camera})
 			, this.tileWidth
 			, this.tileHeight
 		);
-		// this.background1 = new Background(this, map, 1);
-
-		// const barrel = new Sprite('barrel.png');
-
-		// barrel.x = 32;
-		// barrel.y = 32;
-
+		
 		this.sprites.add(this.background);
-		// this.sprites.add(this.background1);
-
-		// this.sprites.add(barrel);
-		// this.sprites.add(new Sprite('player_standing_south.png'));
-
 	}
 
 	unselect()
@@ -324,24 +198,22 @@ export class SpriteBoard extends Gl2d.inject({Camera})
 		maxY += 1;
 
 		let tileSize = 32;
-		let modSize  = tileSize * this.zoomLevel;
+		// let modSize  = tileSize * this.zoomLevel;
 
 		// console.log(minX, minY);
 
 		this.setRectangle(
 			(minX * modSize)
 				- this.Camera.x * this.zoomLevel
-				+ (this.element.width /2)
-				- (modSize /2)
+				// + (this.element.width /2)
+				// - (modSize /2)
 			, (minY * modSize)
 				- this.Camera.y * this.zoomLevel
-				+ (this.element.height /2)
-				- (modSize /2)
+				// + (this.element.height /2)
+				// - (modSize /2)
 			, (maxX - minX) * modSize
 			, (maxY - minY) * modSize
 		);
-
-		console.log();
 
 		gl.drawArrays(gl.TRIANGLES, 0, 6);
 	}
