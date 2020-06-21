@@ -10,6 +10,8 @@ export class SpriteSheet
 		this.height   = 0;
 
 		let request   = new Request(this.boxesUrl);
+		
+		this.rendering = {};
 
 		let sheetLoader = fetch(request).then((response)=>{
 			return response.json().then((boxes)=>{
@@ -54,7 +56,7 @@ export class SpriteSheet
 
 		for(let i in this.boxes.frames)
 		{
-			const subCanvas    = document.createElement('canvas');
+			const subCanvas  = document.createElement('canvas');
 
 			subCanvas.width  = this.boxes.frames[i].frame.w;
 			subCanvas.height = this.boxes.frames[i].frame.h;
@@ -170,6 +172,11 @@ export class SpriteSheet
 			return Promise.resolve(key);
 		}
 
+		if(this.rendering[key])
+		{
+			return this.rendering[key];
+		}
+
 		const subCanvas  = document.createElement('canvas');
 
 		subCanvas.width  = width;
@@ -190,7 +197,7 @@ export class SpriteSheet
 
 		subContext.fillText(char, width / 2, 0, width);
 
-		return new Promise((accept, reject)=>{
+		this.rendering[key] = new Promise((accept, reject)=>{
 
 			subCanvas.toBlob((blob)=>{
 
@@ -208,6 +215,8 @@ export class SpriteSheet
 			});
 
 		});
+
+		return this.rendering[key];
 	}
 
 	static loadTexture(gl2d, imageSrc)

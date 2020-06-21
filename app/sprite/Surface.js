@@ -277,19 +277,21 @@ export class Surface extends Injectable.inject({Gl2d, Camera, SpriteSheet})
 			, 0
 		);
 
-		for(let i in this.subTextures)
+		if(index)
 		{
-			if(index !== false && i !== index)
+			if(!this.subTextures[index])
 			{
-				continue;
+				return;
 			}
 
-			if(index !== false)
+			this.renderTile(index);
+		}
+		else
+		{
+			for(let i in this.subTextures)
 			{
-				console.log(i, index);
+				this.renderTile(i);
 			}			
-			
-			this.renderTile(i);			
 		}
 
 		gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -316,30 +318,29 @@ export class Surface extends Injectable.inject({Gl2d, Camera, SpriteSheet})
 		let x = xTile * this.tileWidth;
 		let y = yTile * this.tileHeight;
 
+		gl.enableVertexAttribArray(this.gl2d.texCoordLocation);
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.gl2d.texCoordBuffer);
+
 		for(let j in this.subTextures[i])
 		{
 			gl.bindTexture(gl.TEXTURE_2D, this.subTextures[i][j]);
-			gl.enableVertexAttribArray(this.gl2d.texCoordLocation);
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.gl2d.texCoordBuffer);
 
-			gl.vertexAttribPointer(
-				this.gl2d.texCoordLocation
-				, 2
-				, gl.FLOAT
-				, false
-				, 0
-				, 0
-			);
-
-			gl.bindBuffer(gl.ARRAY_BUFFER, this.gl2d.texCoordBuffer);
-			gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
-				0.0,  0.0,
-				1.0,  0.0,
-				0.0,  1.0,
-				0.0,  1.0,
-				1.0,  0.0,
-				1.0,  1.0,
-			]), gl.STREAM_DRAW);
+			// gl.vertexAttribPointer(
+			// 	this.gl2d.texCoordLocation
+			// 	, 2
+			// 	, gl.FLOAT
+			// 	, false
+			// 	, 0
+			// 	, 0
+			// );
+			// gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+			// 	0.0,  0.0,
+			// 	1.0,  0.0,
+			// 	0.0,  1.0,
+			// 	0.0,  1.0,
+			// 	1.0,  0.0,
+			// 	1.0,  1.0,
+			// ]), gl.STREAM_DRAW);
 
 			this.setRectangle(
 				x

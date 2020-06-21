@@ -23,8 +23,8 @@ export class View extends BaseView
 		this.cursorX = 0;
 		this.cursorY = 0;
 
-		this.cellSizeX = 14;
-		this.cellSizeY = 21;
+		this.cellSizeX = 8;
+		this.cellSizeY = 11;
 
 		this.scrollLock = false;
 
@@ -48,47 +48,12 @@ export class View extends BaseView
 		
 		this.inputBuffer = new LineBuffer();
 
-		// vb.content  = 'something';
-		// vb2.content = 'something else';
-		// vb3.content = '\u001b[0msomething else\u001b[0m';
-
-		// this.onInterval(1500, () => {
-		// 	vb.content = '\u001b[1mNYC:'
-		// 		+ ' \u001b[36;0;3;m'
-		// 		+ (new Date).toLocaleString('en-US', {
-		// 			timeZone: 'America/New_York'
-		// 		})
-		// 		+ ' \u001b[38;2;255;255;255;48;2;255;0;0;1m '
-		// 		+ 10 ** Math.floor( Math.random() * 5 )
-		// 		+ ' lmao'
-		// 		+ ' \u001b[0m';
-		// });
-		
-		// this.onInterval(1000, () => {
-		// 	vb2.content = 'UTC:'
-		// 		+ ' \u001b[31m'
-		// 		+ (new Date).toLocaleString('en-US', {
-		// 			timeZone: 'UTC'
-		// 		})
-		// 		+ ' \u001b[47;30m '
-		// 		+ 10 ** Math.floor( Math.random() * 10 )
-		// 		+ ' lmao'
-		// 		+ ' \u001b[0m';
-		// });
-
-		// let iii = 0
-
-		// // this.onInterval(10, () => {
-		// // 	vb3.content = '\u001b[35m' + String(iii++);
-		// // });
-
 		this.color = 'white';
 
-		this.print(
-			require('../static/declaration')
-			).then(() => this.color = 'white'
-			).then(() => this.inputBuffer.render(this)
-			).then(() => {
+		this.print(require('../static/declaration'))
+			.then(() => this.color = 'white')
+			.then(() => this.inputBuffer.render(this))
+			.then(() => {
 
 			this.cursor = new Sprite('_');
 
@@ -155,32 +120,45 @@ export class View extends BaseView
 
 						return this.newline().then(()=>{
 
-							const returnBuffer = this.interpret(input);
+							const result = this.interpret(input);
 
-							if(typeof returnBuffer === 'string' || !returnBuffer)
+							this.inputBuffer = new LineBuffer(this);
+
+							if(typeof result === 'string' || !result)
 							{
 								const output = new LineBuffer(this);
 
-								if(returnBuffer === undefined)
+								if(result === undefined)
 								{
 									output.content = `Command not found: "${input}"`;
 								}
 								else
 								{
-									output.content = returnBuffer;
+									output.content = result;
 								}
 
-
 								output.render(this);
+
+								this.newline();
+							}
+							else if(Array.isArray(result))
+							{
+								result.map(b => {
+
+									console.log(b);
+
+									b.render(this);
+
+									this.newline();
+
+								})
 							}
 							else
 							{
-								returnBuffer.render(this);
-							}
-						
-							this.inputBuffer = new LineBuffer(this);
+								result.render(this);
 
-							return this.newline();
+								return this.newline();
+							}
 						
 						}).then(()=>{
 
@@ -497,6 +475,11 @@ export class View extends BaseView
 
 	print(string)
 	{
+		if(!string)
+		{
+			return Promise.resolve().then(()=> this.resize());
+		}
+
 		const chars = string.split('');
 
 		const spriteSheet = this.map.SpriteSheet;
@@ -549,7 +532,7 @@ export class View extends BaseView
 
 				const buff = new LineBuffer();
 
-				const drop = this.onInterval(10, ()=> {
+				const drop = this.onInterval(250, ()=> {
 					buff.content = (new Date).toLocaleString('en-US', {
 						timeZone
 					});
@@ -585,6 +568,91 @@ export class View extends BaseView
 				}
 
 				return result.join(', ');
+			}
+
+			, countdown: (top, interval) => {
+
+				top = parseInt(top);
+
+				if(top <= 0)
+				{
+					return;
+				}
+
+				const buff = new LineBuffer();
+
+				const drop = this.onInterval(interval, () => {
+
+					buff.content = top--;
+
+					if(top <= 0)
+					{
+						buff.content = '0';
+
+						clearInterval(drop);
+					}
+
+				});
+
+				return buff;
+			}
+
+			, roll: (sides = 6, roll = 40) => {
+
+				const maxInterval = 75;
+				
+				let interval = 15;
+
+				const buff = new LineBuffer();
+				const next = () => {
+
+					const side = Math.floor(Math.random() * sides);
+
+					if(roll > 0)
+					{
+						interval += interval * 0.05;
+
+						if(maxInterval < interval)
+						{
+							interval = maxInterval;
+						}
+
+						buff.content = '\u001b[31m' + side;
+
+						this.onTimeout(Math.random() * interval, next);
+					}
+					else
+					{
+						buff.content = '\u001b[34mX';
+						buff.content = '\u001b[32m' + side;
+					}
+
+					roll--;
+				};
+
+				next();
+
+				return buff;
+			}
+
+			, motd: () => {
+
+				return require('../static/declaration');
+
+			}
+
+			, mx: (count, ...command) => {
+
+				const buffers = [];
+
+				for(let i = 0; i < count; i++)
+				{
+					buffers.push(
+						this.interpret(command.join(' '))
+					);
+				}
+
+				return buffers;
 			}
 
 		};

@@ -118,7 +118,7 @@ export class Sprite extends Injectable.inject({Gl2d, Camera, SpriteSheet})
 
 		this.SpriteSheet.ready.then((sheet)=>{
 			
-			this.SpriteSheet.createCharacter(imageSrc, 14, 21, 'yellow').then(key => {
+			this.SpriteSheet.createCharacter(imageSrc, 8, 11, 'yellow').then(key => {
 
 				const frame = this.SpriteSheet.frames[key];
 
